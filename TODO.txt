@@ -1,0 +1,27 @@
+####
+##      TODO
+#    
+#>-------------------->>>
+
+
+
+## H3LLBOY
+
+
+
+
+
+## JMW_87
+
+
+
+
+## MJ-meo-dmt_
+
+# Block clients from trying to connect to a active game.
+# Do the basic db stuff..
+# Create the packet system for the login part.
+# and then the lobby for active players.. in somelist then display them
+# also dont let people join games that are active.
+
+

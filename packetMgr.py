@@ -1,4 +1,26 @@
+# I will atempt t write a packet handler/manager for the sending and recieving of packets.
+# For now this is useless... I guess because we will have like 3 to for if anyway... we can probly use or between the spells.. 
 
+# PacketHandler.
+'''
+class PacketMgr:
+	
+	def __init__(self):
+		pass 
+		
+	
+	# The Do section. 
+	# This will be for sending 'update' packets to clients.
+	def doMove(self, users, ):
+		print "DOING MOVE"
+		
+	def doCast(self):
+		pass
+		
+	def doChat(self):
+		pass
+
+'''
 # Other random idea code..
 
 '''
@@ -13,7 +35,7 @@ maak n system wat die hosted games laat oppop langs die kant.  soos a desktop.
 
 # Class to handle the lobby and gameHosts at same time...
 # mini popup in game list, user click join and client connects to that game via ip, hostName.
-# Instance to make that will fit self.hostList = LiveGames(self)
+# Instance to make that will fit self.hostList = LiceGames(self)
 class LiveGames:
     
         def __init__(self, state):

@@ -1,7 +1,7 @@
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("",
 """    
-	window-title WARLOCKS LOGIN
+	window-title WARLOCKS
 	fullscreen 0
 	win-size 1024 768
 	cursor-hidden 0
@@ -24,33 +24,117 @@ from mainmenu import MainMenu
 from lobby import Lobby
 from pregame import Pregame
 from playstate import Playstate
+from client_config import *
+
 
 class Main(ShowBase):
 	def __init__(self):
 		self.created_client=False
 		ShowBase.__init__(self)
 		self.prelobby=PreLobby(self)
-	
-	def login(self,username,password):
-		self.username=username
-		self.status=OnscreenText(text = "Attempting to login...", pos = Vec3(0, -0.4, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter)
-		# simulate authentication by delaying before continuing
-		# if authentication fails, create prelobby again with status text "LOGIN FAILED!"
-		#self.prelobby=PreLobby(self,"LOGIN FAILED!")
-		# else proceed to lobby state
-		taskMgr.doMethodLater(0.01, self.start_mainmenu, 'Start MainMenu')
+		# Client username
+		self.username = ""
+
+        def login(self, username, password):
+                # This should move maybe im not sure.
+		self.client = Client(LOGIN_IP, LOGIN_PORT, compress=True)
+                
+                # Add the handler for the login stage.
+                taskMgr.doMethodLater(0.2, self.login_packetReader, 'Update Login')
+                
+		if self.client.getConnected():
+				if username and password:
+                                        
+                                        # Setup the un/up sendpacket, this will be changed. later :P
+                                        data = {}
+                                        data[0] = 'login_request'
+                                        data[1] = {}
+                                        data[1][0] = username
+                                        data[1][1] = password
+                                        self.client.sendData(data)
+                                        return True
+                                else:
+                                        False
+                                
+                                                
+						
+                                                # Create account?
+                                        '''
+                                        if self.db.username_status == True:
+                                            
+                                                
+					
+                                                self.username = username
+                                                self.status=OnscreenText(text = "Attempting to login...", pos = Vec3(0, -0.4, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter)
+                                                taskMgr.add(self.start_mainmenu, 'Start MainMenu')
+                                        else:
+                                                self.prelobby.updateStatus(self.db.status)
+                                        '''
+		else:
+			# simulate authentication by delaying before continuing
+			# if authentication fails, create prelobby again with status text "LOGIN FAILED!"
+			
+			self.prelobby=PreLobby(self)
+                        self.prelobby.updateStatus("Could not connect to the Login server")
+                        
+        def login_packetReader(self, task):
+		temp=self.client.getData()
+		if temp!=[]:
+			for i in range(len(temp)):
+				valid_packet=False
+				package=temp[i]
+				if len(package)==2:
+					print "Received: " + str(package)
+					print "Connected to login server"
+					# updates warlocks in game
+                                        if package[0]=='db_reply':
+                                                print "DB: "+str(package[1])
+                                                self.prelobby.updateStatus(package[1])
+                                                valid_packet=True
+                                                
+                                        elif package[0]=='login_valid':
+                                                print "Login valid: "+str(package[1])
+                                                self.prelobby.updateStatus(package[1][0])
+                                                print "i am warlock: "+str(package[1])
+						#self.game.which=package[1][1]
+                                                valid_packet=True
+						print "I should move to lobby now..."
+                                                taskMgr.doMethodLater(0.3, self.start_mainmenu, 'Start Main Menu')
+                                                
+					if not valid_packet:
+						data = {}
+						data[0] = "error"
+						data[1] = "Fail Server"
+						self.client.sendData(data)
+						print "Bad packet from server"
+				else:
+					print "Packet wrong size"
+			
+		return task.again
 		
+	def create_Account(self, username, password):
+		# Got the username and password now check if it exists, if not create it.
+		if username and password:
+			print username
+			self.db.Client_acc_add(username, password)
+			if self.db.newuser_created == True:
+				self.prelobby.updateStatus(self.db.status)
+				
+			else:
+				self.prelobby.updateStatus(self.db.status) # This is the error. if found in db already.
+	
+	
 	def start_mainmenu(self,task):
 		self.prelobby.destroy()
-		self.status.destroy()
+		#self.status.destroy()   # HERE ALSO HAD TO COMMENT TO MAKE IT WORK
 		self.mainmenu=MainMenu(self)
 		return task.done
 		
 	def join_server(self,address):
 		# Connect to our server
-		self.client = Client(address, 9099, compress=True)
+		# self.client = Client(address, 9099, compress=True)
 		if self.client.getConnected():
-			self.created_client=True
+			#self.created_client=True
 			data = {}
 			data[0]="username"
 			data[1]=self.username
@@ -61,8 +145,8 @@ class Main(ShowBase):
 			return False
 		
 	def start_lobby(self,task):
-		self.mainmenu.hide()
-		self.status.destroy()
+		#self.mainmenu.hide()
+		#self.status.destroy() ## HERE ALSO HAD TO COMMENT TO MAKE IT WORK
 		self.lobby=Lobby(self)
 		return task.done
 		

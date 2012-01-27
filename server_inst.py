@@ -11,12 +11,11 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from pandac.PandaModules import *
 
+from db import DataBase
 from server import Server
 from game import Game
 
 game_tick=1.0/60.0
-
-num_users=8
 
 class ServerInst():
 	def __init__(self):
@@ -26,26 +25,88 @@ class ServerInst():
 		# Disable Mouse Control for camera
 		self.showbase.disableMouse()
 		
-		# Start our server up
-		self.server = Server(9099, compress=True)
-		
-		self.users={}
-		
-		for i in range(num_users):
-			new_user={}
-			new_user['name']='cake'
-			new_user['connection']='cake'
-			new_user['ready']=True
-			new_user['new_dest']=False
-			new_user['new_spell']=False
-			self.users[len(self.users)]=new_user
-		
-		camera.setPos(0,0,45*num_users)
+		camera.setPos(0,0,350)
 		camera.lookAt(0,0,0)
 		
-		#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Lobby Loop')
-		taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
-
+		# Start our server up
+		self.server = Server(9099, compress=True)
+		self.db = DataBase()
+		self.users={}
+		
+		taskMgr.doMethodLater(0.5, self.login_loop, 'Login Loop')
+        
+        
+        def login_loop(self, task):
+                # If in login stat.
+                temp=self.server.getData()
+                if temp!=[]:
+                        for i in range(len(temp)):
+                                valid_packet=False
+                                package=temp[i]
+                                if len(package)==2:
+                                        print "Received: " + str(package) +" "+ str(package[1].getAddress())
+                                        print str(len(package[0]))
+                                        if len(package[0])==2:
+                                                print "Got len"
+                                                # if login request is send reply
+                                                print package[0][0]
+                                                if package[0][0]=='login_request':
+                                                        print "Login Request found!"
+                                                        user_found=False
+                                                        valid_packet=True
+                                                        for u in range(len(self.users)):
+                                                                print package[0][1], package[0][0]
+                                                                if self.users[u]['name']==package[0][1][0]:
+                                                                        print "User already logged on"
+                                                                        user_found=True
+                                                                        data = {}
+                                                                        data[0] = "error"
+                                                                        data[1] = "User already logged on"
+                                                                        self.server.sendData(data, package[1])
+                                                        # Login 
+                                                        if not user_found:
+                                                                
+                                                                print "Try login"
+                                                                username=package[0][1][0]
+                                                                password=package[0][1][1]
+                                                                self.db.Client_getLogin(username, password)
+                                                                if self.db.login_valid:
+                                                                        # Add the use to the list.
+                                                                        print "ADD THE CLIENT TO LIST"
+                                                                        print self.db.login_valid
+                                                                        new_user={}
+                                                                        new_user['name']=package[0][1][0]
+                                                                        new_user['connection']=package[1]
+                                                                        new_user['ready']=False
+                                                                        new_user['new_dest']=False
+                                                                        new_user['new_spell']=False
+                                                                        self.users[len(self.users)]=new_user
+                                                                        # Send back the valid check.
+                                                                        status=self.db.status
+                                                                        data={}
+                                                                        data[0]='login_valid'
+                                                                        data[1]=status
+                                                                        taskMgr.doMethodLater(0.1, self.lobby_loop, 'Lobby Loop')
+                                                                else:
+                                                                        print self.db.no_user_found
+                                                                        status = self.db.status
+                                                                        data={}
+                                                                        data[0]='db_reply'
+                                                                        data[1]=status
+                                                                        self.server.sendData(data, package[1])
+                                                if not valid_packet:
+							data = {}
+							data[0] = "error"
+							data[1] = "Wrong Packet"
+							self.server.sendData(data,package[1])
+							print "Login Packet not correct"
+                                        
+                                        else:
+                                                    print "Data in packet wrong size"
+                
+                return task.again
+        
+        
 	# handles new joining clients and updates all clients of chats and readystatus of players
 	def lobby_loop(self,task):
 		# if in lobby state
@@ -58,30 +119,10 @@ class ServerInst():
 					print "Received: " + str(package) +" "+ str(package[1].getAddress())
 					if len(package[0])==2:
 						# if username is sent, assign to client
-						if package[0][0]=='username':
-							user_found=False
-							valid_packet=True
-							for u in range(len(self.users)):
-								if self.users[u]['name']==package[0][1]:
-									print "User already exists"
-									user_found=True
-									data = {}
-									data[0] = "error"
-									data[1] = "User already exists"
-									self.server.sendData(data,package[1])
-									# send something back to the client saying to change username
-							if not user_found:
-								new_user={}
-								new_user['name']=package[0][1]
-								new_user['connection']=package[1]
-								new_user['ready']=False
-								new_user['new_dest']=False
-								new_user['new_spell']=False
-								self.users[len(self.users)]=new_user
-								data = {}
-								data[0] = "which"
-								data[1] = len(self.users)-1
-								self.server.sendData(data,package[1])
+								#data = {}
+								#data[0] = "which"
+								#data[1] = len(self.users)-1
+								#self.server.sendData(data,package[1])
 						# else check to make sure connection has username
 						for u in range(len(self.users)):
 							if self.users[u]['connection']==package[1]:
@@ -116,8 +157,8 @@ class ServerInst():
 									self.server.broadcastData(data)
 								# break out of for loop
 								break
-							#else:
-							#	print str(self.users[u]['connection'])+" "+str(package[1])
+							else:
+								print str(self.users[u]['connection'])+" "+str(package[1])
 						if not valid_packet:
 							data = {}
 							data[0] = "error"
@@ -154,6 +195,8 @@ class ServerInst():
 			self.users[u]['warlock']=self.game.warlock[u]
 		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
 		return task.done
+            
+            # FROM HERE WILL GO TO GAME SERVER>>>
 		#return task.again
 		
 	def game_loop(self,task):
@@ -168,11 +211,11 @@ class ServerInst():
 					if len(package)==2:
 						print "Received: " + str(package) +" "+str(package[1])
 						if len(package[0])==2:
-							#print "packet right size"
+							print "packet right size"
 							# else check to make sure connection has username
 							for u in range(len(self.users)):
 								if self.users[u]['connection']==package[1]:
-									#print "Packet from "+self.users[u]['name']
+									print "Packet from "+self.users[u]['name']
 									# process packet
 									# if chat packet
 									if package[0][0]=='destination':
@@ -188,8 +231,8 @@ class ServerInst():
 										self.users[u]['warlock'].set_spell(package[0][1][0],package[0][1][1])
 										self.users[u]['new_spell']=True
 									break
-								#else:
-								#	print "couldnt find connection"+str(self.users[u]['connection'])+" "+str(package[1])
+								else:
+									print "couldnt find connection"+str(self.users[u]['connection'])+" "+str(package[1])
 			# get frame delta time
 			dt=globalClock.getDt()
 			self.game_time+=dt

@@ -7,7 +7,7 @@ class MainMenu():
 	def __init__(self, game):
 		self.game=game
 		
-		self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
+		#self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
 		
 		self.background = OnscreenImage(
 			image  = 'media/gui/newMainmenu.png',
@@ -40,6 +40,7 @@ class MainMenu():
 		
 		self.addButton("QUIT!",  game.quit, -.5)
 		
+        # Check here for the blocking.
 	def join_server(self):
 		self.setIp(self.entry.get())
 		self.status.setText("Attempting to join server @ "+self.ip+"...")

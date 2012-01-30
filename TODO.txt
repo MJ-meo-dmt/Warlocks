@@ -18,10 +18,8 @@
 
 ## MJ-meo-dmt_
 
-# Block clients from trying to connect to a active game.
-# Do the basic db stuff..
-# Create the packet system for the login part.
-# and then the lobby for active players.. in somelist then display them
-# also dont let people join games that are active.
+Add a checker for 'Allready logged in' or something a like.
+Get the main menu setup for host,join,exit where host and join will have there own states. 
+Get the client to join a server and then after the game let it return to the lobby/login server.
 
 

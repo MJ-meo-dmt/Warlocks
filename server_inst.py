@@ -33,7 +33,10 @@ class ServerInst():
 		self.db = DataBase()
 		self.users={}
 		
-		taskMgr.doMethodLater(0.5, self.login_loop, 'Login Loop')
+		if newGame == True:
+			# Lets make something that instances the gameServer class for everything game thats hosted?
+			
+			taskMgr.doMethodLater(0.5, self.login_loop, 'Login Loop') # Probly start the game then
         
         
         def login_loop(self, task):
@@ -185,7 +188,7 @@ class ServerInst():
 			taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
 			return task.done
 		return task.again
-		
+		# FROM HERE WILL GO TO GAME SERVER>>>
 	def pregame_loop(self,task):
 		print "Pregame State"
 		self.game_time=0
@@ -196,7 +199,7 @@ class ServerInst():
 		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
 		return task.done
             
-            # FROM HERE WILL GO TO GAME SERVER>>>
+            
 		#return task.again
 		
 	def game_loop(self,task):

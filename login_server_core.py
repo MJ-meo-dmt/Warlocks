@@ -33,7 +33,7 @@ class LoginServer:
 		self.db = DataBase()
 		# This is for pre-login
 		self.tempConnections = []
-		# This is for auth clients
+		# This is for authed clients
 		self.activeConnections = []
 		
 		# Temp user dict
@@ -123,34 +123,47 @@ class LoginServer:
 		if len(package)==2:
 			print "Received: " + str(package) +" "+ str(clientIp)
 			# if login request is send reply
+			# Should add a checker like in the db something like isLogged(0 or 1)
+			# If found then say no for client.
 			if package[0]=='login_request':
 				valid_packet=True
+				user_found=False
 				print "Try login"
-				username=package[1][0]
-				password=package[1][1]
-				self.db.Client_getLogin(username, password)
-				if self.db.login_valid:
-					# Add the user
-					new_user={}
-					new_user['name']=package[1][0]
-					new_user['connection']=clientCon
-					new_user['ready']=False
-					new_user['new_dest']=False
-					new_user['new_spell']=False
-					self.clients[len(self.clients)]=new_user
-					# Send back the valid check.
-					data={}
-					data[0]='login_valid' # If client gets this the client should switch to lobby.
-					data[1]={}
-					data[1][0]=self.db.status
-					data[1][1]=len(self.clients)-1
-					self.sendData(data, clientCon)
+				for u in range(len(self.clients)):
+					if self.clients[u]['name']==package[1][0]:
+						print "User already exists"
+						user_found=True
+						data = {}
+						data[0] = "error"
+						data[1] = "User already exists"
+						self.sendData(data,clientCon)
+						# send something back to the client saying to change username
+				if not user_found:
+					username=package[1][0]
+					password=package[1][1]
+					self.db.Client_getLogin(username, password)
+					if self.db.login_valid:
+						# Add the user
+						new_user={}
+						new_user['name']=package[1][0]
+						new_user['connection']=clientCon
+						new_user['ready']=False
+						new_user['new_dest']=False
+						new_user['new_spell']=False
+						self.clients[len(self.clients)]=new_user
+							# Send back the valid check.
+						data={}
+						data[0]='login_valid' # If client gets this the client should switch to main_menu.
+						data[1]={}
+						data[1][0]=self.db.status
+						data[1][1]=len(self.clients)-1
+						self.sendData(data, clientCon)
 					
-					# Move client to the self.activeConnections list.
-					self.activeConnections.append(clientCon)
-					print "HERE IS ACTIVE: ", self.activeConnections
-					self.tempConnections.remove(clientCon)
-					print "HERE IS TEMP", self.tempConnections
+						# Move client to the self.activeConnections list.
+						self.activeConnections.append(clientCon)
+						print "HERE IS ACTIVE: ", self.activeConnections
+						self.tempConnections.remove(clientCon)
+						print "HERE IS TEMP", self.tempConnections
 					
 				else:
 					status = self.db.status
@@ -177,15 +190,12 @@ class LoginServer:
 			if self.cReader.getData(datagram):
 				
 				if datagram.getConnection() in self.tempConnections:
-					print "Check Auth?"
+					print "Check Auth!"
 					self.auth(datagram)
 					print "Auth Done!"
 					# in auth def or after the connection will be moved to self.activeConnections
 					# and then removed from the temp list
-					
 					break
-					
-				
 				# Check if the data rechieved is from a valid client.
 				elif datagram.getConnection() in self.activeConnections:
 					appendage={}

@@ -7,15 +7,15 @@ class MainMenu():
 	def __init__(self, game):
 		self.game=game
 		
-		#self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
+		self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
 		
 		self.background = OnscreenImage(
-			image  = 'media/gui/newMainmenu.png',
+			image  = 'media/gui/mainmenu/menu.png',
 			parent = render2d
 		)
 
 		self.title = OnscreenText(
-			text   = 'Welcome '+game.username+'!',
+			text   = 'Main Menu',
 			fg     = (1, 1, 1, 1),
 			parent = self.background,
 			pos    = (-0.6, 0.1),

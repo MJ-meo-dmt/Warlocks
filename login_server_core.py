@@ -124,10 +124,10 @@ class LoginServer:
 			print "Received: " + str(package) +" "+ str(clientIp)
 			# if login request is send reply
 			# Should add a checker like in the db something like isLogged(0 or 1)
-			# If found then say no for client.
+			# If found then say no for client
+			user_found=False
 			if package[0]=='login_request':
 				valid_packet=True
-				user_found=False
 				print "Try login"
 				for u in range(len(self.clients)):
 					if self.clients[u]['name']==package[1][0]:
@@ -135,8 +135,9 @@ class LoginServer:
 						user_found=True
 						data = {}
 						data[0] = "error"
-						data[1] = "User already exists"
+						data[1] = "User already logged in"
 						self.sendData(data,clientCon)
+						break
 						# send something back to the client saying to change username
 				if not user_found:
 					username=package[1][0]

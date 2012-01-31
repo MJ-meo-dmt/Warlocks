@@ -18,8 +18,8 @@
 
 ## MJ-meo-dmt_
 
-Add a checker for 'Allready logged in' or something a like.
-Get the main menu setup for host,join,exit where host and join will have there own states. 
-Get the client to join a server and then after the game let it return to the lobby/login server.
+Fixed the login.  - Multi users could logon, now it give and error. :)
+ok now.. when a client dc remove the 'user', 'name' from the self.clients{}
 
+Get the client to join a server.
 

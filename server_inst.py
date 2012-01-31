@@ -27,167 +27,16 @@ class ServerInst():
 		
 		camera.setPos(0,0,350)
 		camera.lookAt(0,0,0)
-		
 		# Start our server up
 		self.server = Server(9099, compress=True)
 		self.db = DataBase()
-		self.users={}
+		self.users={} # We should send the clients from the lobby to here somehow? or just get it from somewhere...
 		
-		if newGame == True:
+		#if newGame == True:
 			# Lets make something that instances the gameServer class for everything game thats hosted?
 			
-			taskMgr.doMethodLater(0.5, self.login_loop, 'Login Loop') # Probly start the game then
+		taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop') # Probly start the game then
         
-        
-        def login_loop(self, task):
-                # If in login stat.
-                temp=self.server.getData()
-                if temp!=[]:
-                        for i in range(len(temp)):
-                                valid_packet=False
-                                package=temp[i]
-                                if len(package)==2:
-                                        print "Received: " + str(package) +" "+ str(package[1].getAddress())
-                                        print str(len(package[0]))
-                                        if len(package[0])==2:
-                                                print "Got len"
-                                                # if login request is send reply
-                                                print package[0][0]
-                                                if package[0][0]=='login_request':
-                                                        print "Login Request found!"
-                                                        user_found=False
-                                                        valid_packet=True
-                                                        for u in range(len(self.users)):
-                                                                print package[0][1], package[0][0]
-                                                                if self.users[u]['name']==package[0][1][0]:
-                                                                        print "User already logged on"
-                                                                        user_found=True
-                                                                        data = {}
-                                                                        data[0] = "error"
-                                                                        data[1] = "User already logged on"
-                                                                        self.server.sendData(data, package[1])
-                                                        # Login 
-                                                        if not user_found:
-                                                                
-                                                                print "Try login"
-                                                                username=package[0][1][0]
-                                                                password=package[0][1][1]
-                                                                self.db.Client_getLogin(username, password)
-                                                                if self.db.login_valid:
-                                                                        # Add the use to the list.
-                                                                        print "ADD THE CLIENT TO LIST"
-                                                                        print self.db.login_valid
-                                                                        new_user={}
-                                                                        new_user['name']=package[0][1][0]
-                                                                        new_user['connection']=package[1]
-                                                                        new_user['ready']=False
-                                                                        new_user['new_dest']=False
-                                                                        new_user['new_spell']=False
-                                                                        self.users[len(self.users)]=new_user
-                                                                        # Send back the valid check.
-                                                                        status=self.db.status
-                                                                        data={}
-                                                                        data[0]='login_valid'
-                                                                        data[1]=status
-                                                                        taskMgr.doMethodLater(0.1, self.lobby_loop, 'Lobby Loop')
-                                                                else:
-                                                                        print self.db.no_user_found
-                                                                        status = self.db.status
-                                                                        data={}
-                                                                        data[0]='db_reply'
-                                                                        data[1]=status
-                                                                        self.server.sendData(data, package[1])
-                                                if not valid_packet:
-							data = {}
-							data[0] = "error"
-							data[1] = "Wrong Packet"
-							self.server.sendData(data,package[1])
-							print "Login Packet not correct"
-                                        
-                                        else:
-                                                    print "Data in packet wrong size"
-                
-                return task.again
-        
-        
-	# handles new joining clients and updates all clients of chats and readystatus of players
-	def lobby_loop(self,task):
-		# if in lobby state
-		temp=self.server.getData()
-		if temp!=[]:
-			for i in range(len(temp)):
-				valid_packet=False
-				package=temp[i]
-				if len(package)==2:
-					print "Received: " + str(package) +" "+ str(package[1].getAddress())
-					if len(package[0])==2:
-						# if username is sent, assign to client
-								#data = {}
-								#data[0] = "which"
-								#data[1] = len(self.users)-1
-								#self.server.sendData(data,package[1])
-						# else check to make sure connection has username
-						for u in range(len(self.users)):
-							if self.users[u]['connection']==package[1]:
-								print "Packet from "+self.users[u]['name']
-								# process packet
-								update_warlocks=False
-								# if chat packet
-								if package[0][0]=='chat':
-									print "Chat: "+package[0][1]
-									valid_packet=True
-									# Broadcast data to all clients ("username: message")
-									data = {}
-									data[0]='chat'
-									data[1]=self.users[u]['name']+": "+package[0][1]
-									self.server.broadcastData(data)
-								# else if ready packet
-								elif package[0][0]=='ready':
-									print self.users[u]['name']+" is ready!"
-									self.users[u]['ready']=True
-									valid_packet=True
-									update_warlocks=True
-								# else if unready packet
-								elif package[0][0]=='unready':
-									print self.users[u]['name']+" is not ready!"
-									self.users[u]['ready']=False
-									valid_packet=True
-									update_warlocks=True
-								if update_warlocks:
-									data = {}
-									data[0]='warlocks'
-									data[1]=len(self.users)
-									self.server.broadcastData(data)
-								# break out of for loop
-								break
-							else:
-								print str(self.users[u]['connection'])+" "+str(package[1])
-						if not valid_packet:
-							data = {}
-							data[0] = "error"
-							data[1] = "Please Login"
-							self.server.sendData(data,package[1])
-							print "User not logged in"
-					else:
-						print "Data in packet wrong size"
-				else:
-					print "Packet wrong size"
-		# if all players are ready and there is X of them
-		game_ready=True
-		# if there is any clients connected
-		if not self.server.getClients():
-			game_ready=False
-		for u in range(len(self.users)):
-			if self.users[u]['ready']==False:
-				game_ready=False
-		if game_ready:
-			data = {}
-			data[0]='state'
-			data[1]='game'
-			self.server.broadcastData(data)
-			taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
-			return task.done
-		return task.again
 		# FROM HERE WILL GO TO GAME SERVER>>>
 	def pregame_loop(self,task):
 		print "Pregame State"
@@ -274,7 +123,7 @@ class ServerInst():
 				self.game.run_tick()
 			return task.cont
 		else:
-			taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
+			#taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 			return task.done
 
 si = ServerInst()

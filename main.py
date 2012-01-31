@@ -32,6 +32,7 @@ class Main(ShowBase):
 		self.created_client=False
 		ShowBase.__init__(self)
 		self.prelobby=PreLobby(self)
+		self.which=0
 		# Client username
 		self.username = ""
 
@@ -44,7 +45,7 @@ class Main(ShowBase):
                 
 		if self.client.getConnected():
 				if username and password:
-                                        
+                                        self.username=username
                                         # Setup the un/up sendpacket, this will be changed. later :P
                                         data = {}
                                         data[0] = 'login_request'
@@ -55,15 +56,10 @@ class Main(ShowBase):
                                         return True
                                 else:
                                         False
-                                
-                                                
-						
-                                                # Create account?
+					
+					# Create account?
                                         '''
                                         if self.db.username_status == True:
-                                            
-                                                
-					
                                                 self.username = username
                                                 self.status=OnscreenText(text = "Attempting to login...", pos = Vec3(0, -0.4, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter)
                                                 taskMgr.add(self.start_mainmenu, 'Start MainMenu')
@@ -87,7 +83,14 @@ class Main(ShowBase):
 					print "Received: " + str(package)
 					print "Connected to login server"
 					# updates warlocks in game
-                                        if package[0]=='db_reply':
+					if package[0]=='error':
+						print package
+						print "User already logged"
+						self.prelobby.updateStatus(package[1])
+						valid_packet=True
+						break
+					
+					elif package[0]=='db_reply':
                                                 print "DB: "+str(package[1])
                                                 self.prelobby.updateStatus(package[1])
                                                 valid_packet=True
@@ -96,9 +99,9 @@ class Main(ShowBase):
                                                 print "Login valid: "+str(package[1])
                                                 self.prelobby.updateStatus(package[1][0])
                                                 print "i am warlock: "+str(package[1])
-						#self.game.which=package[1][1]
+						self.which=package[1][1]
                                                 valid_packet=True
-						print "I should move to lobby now..."
+						print "I should move to main menu now..."
                                                 taskMgr.doMethodLater(0.3, self.start_mainmenu, 'Start Main Menu')
                                                 
 					if not valid_packet:
@@ -132,14 +135,14 @@ class Main(ShowBase):
 		
 	def join_server(self,address):
 		# Connect to our server
-		# self.client = Client(address, 9099, compress=True)
+		self.client = Client(address, 9099, compress=True)
 		if self.client.getConnected():
 			#self.created_client=True
 			data = {}
 			data[0]="username"
 			data[1]=self.username
 			self.client.sendData(data)
-			taskMgr.doMethodLater(0.01, self.start_lobby, 'Start Lobby')
+			taskMgr.doMethodLater(0.03, self.start_lobby, 'Start Lobby')
 			return True
 		else:
 			return False

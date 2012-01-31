@@ -22,11 +22,21 @@ class MainMenu():
 			scale  = 0.06
 		)
 
-		self.ip = "127.0.0.1"
+		self.ip = "127.0.0.1" # Should make this write to file... so that the user can save ip's...
 
 		self.buttons = []
-		self.addButton("Join Server",  self.join_server, -.1)
-
+		# Buttons
+		boxloc = Vec3(0.0, 0.0, 0.0)
+		# Host
+		p = boxloc + Vec3(-0.85, 0, -0.79)
+		self.hostButton = DirectButton(text="Host", pos = p,  scale = 0.048, relief=DGG.GROOVE, command='')
+		
+		p = boxloc + Vec3(-0.65, 0, -0.79)
+		self.joinButton = DirectButton(text="Join", pos=p, scale=0.048, relief=DGG.GROOVE, command='')
+		
+		
+		self.addButton("Join Server",  self.join_server,2, -.1)
+		
 		self.entry = DirectEntry(
 			command = self.setIp,
 			focusInCommand = self.clearText,
@@ -38,7 +48,7 @@ class MainMenu():
 			text_align  = TextNode.ACenter,
 		)
 		
-		self.addButton("QUIT!",  game.quit, -.5)
+		self.addButton("QUIT!",  game.quit,1, -.5)
 		
         # Check here for the blocking.
 	def join_server(self):
@@ -49,11 +59,11 @@ class MainMenu():
 		else:
 			self.status.setText("Could not Connect...")
 
-	def addButton(self, text, command, zPos):
+	def addButton(self, text, command,xPos, zPos):
 		button = DirectButton(
 			command   = command,
 			frameSize = (-2, 2, -.3, 1),
-			pos       = (0.0, 0.0, zPos),
+			pos       = (xPos, 0.0, zPos),
 			scale     = .1,
 			text      = text,
 		)

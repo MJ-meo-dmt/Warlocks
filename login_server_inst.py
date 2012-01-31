@@ -46,6 +46,7 @@ class LoginInst():
                 print "INIT: DATABASE...\n"
 		self.db = DataBase()
 		self.users=self.LoginServer.clients
+		print self.users, "HERE !!!!!!!!!"
 		
 		taskMgr.doMethodLater(0.2, self.lobby_loop, 'Lobby Loop')
 

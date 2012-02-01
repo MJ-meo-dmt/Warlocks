@@ -32,7 +32,7 @@ class Main(ShowBase):
 		self.created_client=False
 		ShowBase.__init__(self)
 		self.prelobby=PreLobby(self)
-		self.which=0
+		self.which=0 
 		# Client username
 		self.username = ""
 
@@ -160,8 +160,8 @@ class Main(ShowBase):
 		taskMgr.doMethodLater(0.01, self.start_game, 'Start Game')
 	
 	def start_game(self,task):
-		self.lobby.hide()
-		self.status.destroy()
+		#self.lobby.hide()
+		#self.status.destroy()
 		self.pregame=Pregame(self)
 		return task.done
 		

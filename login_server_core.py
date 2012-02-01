@@ -157,7 +157,7 @@ class LoginServer:
 						data[0]='login_valid' # If client gets this the client should switch to main_menu.
 						data[1]={}
 						data[1][0]=self.db.status
-						data[1][1]=len(self.clients)-1
+						data[1][1]=len(self.clients)-1 # This is part of the old 'which' packet
 						self.sendData(data, clientCon)
 					
 						# Move client to the self.activeConnections list.

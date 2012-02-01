@@ -84,10 +84,6 @@ class Lobby():
 						print "warlocks: "+str(package[1])
 						self.game.num_warlocks=package[1]
 						valid_packet=True
-					elif package[0]=='which':
-						print "i am warlock: "+str(package[1])
-						self.game.which=package[1]
-						valid_packet=True
 					# changes to game state
 					elif package[0]=='state':
 						print "state: "+package[1]

@@ -32,10 +32,10 @@ class MainMenu():
 		self.hostButton = DirectButton(text="Host", pos = p,  scale = 0.048, relief=DGG.GROOVE, command='')
 		
 		p = boxloc + Vec3(-0.65, 0, -0.79)
-		self.joinButton = DirectButton(text="Join", pos=p, scale=0.048, relief=DGG.GROOVE, command='')
+		self.joinButton = DirectButton(text="Join", pos=p, scale=0.048, relief=DGG.GROOVE, command=self.join_server)
 		
 		
-		self.addButton("Join Server",  self.join_server,2, -.1)
+		self.addButton("Join Server",  self.join_server,1, -.1)
 		
 		self.entry = DirectEntry(
 			command = self.setIp,
@@ -49,6 +49,14 @@ class MainMenu():
 		)
 		
 		self.addButton("QUIT!",  game.quit,1, -.5)
+        
+        def join_chat(self):
+            pass
+            # Let the client mini auth with the lobby server(lobby_loop) by "Loging into the chat"
+            # Since everything will be in the main menu? like a main chat window.. something similar to HoN i guess?
+            # When the player opens the Join game by button, a list will be send from the lobby server telling it what games are active.
+            # Then the player picks one and it connects via the host name/ip or whatever.
+            # While this is busy happening the client stays connected to the lobby server.
 		
         # Check here for the blocking.
 	def join_server(self):

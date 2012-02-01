@@ -39,19 +39,42 @@ class ServerInst():
         
 		# FROM HERE WILL GO TO GAME SERVER>>>
 	def pregame_loop(self,task):
+		# Guess all of this should move after the if.
 		print "Pregame State"
 		self.game_time=0
 		self.tick=0
 		self.game=Game(len(self.users),game_tick,self.showbase)
 		for u in range(len(self.users)):
 			self.users[u]['warlock']=self.game.warlock[u]
-		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
-		return task.done
+			break
+		if self.server.getClients():
+			temp=self.server.getData()
+			print temp
+			if temp!=[]:
+				for i in range(len(temp)):
+					valid_packet=False
+					package=temp[i]
+					if len(package)==2:
+						print "Received: "+str(package)+" "+str(package[1])
+						if len(package[0])==2:
+							print "Packet right size"
+							for u in range(len(self.users)):
+								if self.users[u]['connection']==package[1]:
+									print "Packet from "+self.users[u]['name']
+									
+									if package[0][0]=='ready':
+										print "So i got the ready and im in game state"
+		
+										taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
+										return task.done
+									else:
+										print "well i didnt get shit"
             
             
-		#return task.again
+		return task.again
 		
 	def game_loop(self,task):
+		print "Game State"
 		# if there is any clients connected
 		if self.server.getClients():
 			# process incoming packages

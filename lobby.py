@@ -3,6 +3,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText  import OnscreenText
 from pandac.PandaModules      import *
 
+# This should get a new name something like pregame, or the codes should move.
 class Lobby():
 	def __init__(self, game):
 		self.game=game

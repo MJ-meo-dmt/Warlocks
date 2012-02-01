@@ -115,7 +115,7 @@ class Main(ShowBase):
 			
 		return task.again
 		
-	def create_Account(self, username, password):
+	def create_account(self, username, password):
 		# Got the username and password now check if it exists, if not create it.
 		if username and password:
 			print username
@@ -135,14 +135,16 @@ class Main(ShowBase):
 		
 	def join_server(self,address):
 		# Connect to our server
+                # Here it should either get a list from the lobby server that has a list of games avail.
+                # When the client picks one, it connects to it.
 		self.client = Client(address, 9099, compress=True)
 		if self.client.getConnected():
-			#self.created_client=True
+			print "Connected to server"
 			data = {}
-			data[0]="username"
-			data[1]=self.username
+			data[0]="ready"
+			#data[1]=self.username # This will end up being the selected server?
 			self.client.sendData(data)
-			taskMgr.doMethodLater(0.03, self.start_lobby, 'Start Lobby')
+			taskMgr.doMethodLater(0.03, self.start_lobby, 'Start Lobby') # I guess this should change to Pregame.
 			return True
 		else:
 			return False

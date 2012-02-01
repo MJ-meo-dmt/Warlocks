@@ -43,7 +43,6 @@ class LoginInst():
                 print ""
                 print "INIT: LOGIN SERVER...\n"
 		self.LoginServer = LoginServer(9098, compress=True)
-                print "INIT: DATABASE...\n"
 		self.db = DataBase()
 		self.users=self.LoginServer.clients
 		print self.users, "HERE !!!!!!!!!"
@@ -54,6 +53,7 @@ class LoginInst():
 	def lobby_loop(self,task):
 		# if in lobby state
 		temp=self.LoginServer.getData()
+		print temp
 		if temp!=[]:
 			for i in range(len(temp)):
 				valid_packet=False
@@ -61,14 +61,9 @@ class LoginInst():
 				if len(package)==2:
 					print "Received: " + str(package) +" "+ str(package[1].getAddress())
 					if len(package[0])==2:
-						# if username is sent, assign to client
-								#data = {}
-								#data[0] = "which"
-								#data[1] = len(self.users)-1
-								#self.server.sendData(data,package[1])
-						# else check to make sure connection has username
 						for u in range(len(self.users)):
 							if self.users[u]['connection']==package[1]:
+								print self.users
 								print "Packet from "+self.users[u]['name']
 								# process packet
 								update_warlocks=False
@@ -125,19 +120,10 @@ class LoginInst():
 			data[0]='state'
 			data[1]='game'
 			self.LoginServer.broadcastData(data)
-			taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
+			#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
 			return task.done
 		return task.again
 		
-	def pregame_loop(self,task):
-                print "Pregame State"
-		self.game_time=0
-		self.tick=0
-		self.game=Game(len(self.users),game_tick,self.showbase)
-		for u in range(len(self.users)):
-			self.users[u]['warlock']=self.game.warlock[u]
-		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
-		return task.done
             
             # FROM HERE WILL GO TO GAME SERVER>>>
 		#return task.again

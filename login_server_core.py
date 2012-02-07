@@ -108,16 +108,17 @@ class LoginServer:
 
 	def sendData(self, data, con):
 		myPyDatagram = PyDatagram()
+		#myPyDatagram.addUint16(opcode)
 		myPyDatagram.addString(self.encode(data, self.compress))
 		self.cWriter.send(myPyDatagram, con)
 		
 	# This will check and do the logins.
 	def auth(self, datagram): 
-                # If in login state.
+		# If in login state.
 		clientIp = datagram.getAddress() # This is the ip :P
 		clientCon = datagram.getConnection() # This is the connection data. used to send the shit.
-                package=self.processData(datagram)
-                print "SERVER: ",package
+		package=self.processData(datagram)
+		print "SERVER: ",package
 		print "SERVER: This is the package: ", package
 		valid_packet=False
 		if len(package)==2:
@@ -126,7 +127,7 @@ class LoginServer:
 			# Should add a checker like in the db something like isLogged(0 or 1)
 			# If found then say no for client
 			user_found=False
-			if package[0]=='login_request':
+			if package[0]=='login_request': # LOGIN REQ
 				valid_packet=True
 				print "Try login"
 				for u in range(len(self.clients)):
@@ -134,7 +135,7 @@ class LoginServer:
 						print "User already exists"
 						user_found=True
 						data = {}
-						data[0] = "error"
+						data[0] = "error" # LOGIN FAIL
 						data[1] = "User already logged in"
 						self.sendData(data,clientCon)
 						break
@@ -154,7 +155,7 @@ class LoginServer:
 						self.clients[len(self.clients)]=new_user
 							# Send back the valid check.
 						data={}
-						data[0]='login_valid' # If client gets this the client should switch to main_menu.
+						data[0]='login_valid' # LOGIN ACK
 						data[1]={}
 						data[1][0]=self.db.status
 						data[1][1]=len(self.clients)-1 # This is part of the old 'which' packet
@@ -169,12 +170,12 @@ class LoginServer:
 				else:
 					status = self.db.status
 					data={}
-					data[0]='db_reply'
+					data[0]='db_reply' # DB STATUS
 					data[1]=status
 					self.sendData(data, clientCon)
 			if not valid_packet:
 				data = {}
-				data[0] = "error"
+				data[0] = "error" # DEFAULT WRONG PACKET
 				data[1] = "Wrong Packet"
 				self.sendData(data, clientCon)
 				print "Login Packet not correct"

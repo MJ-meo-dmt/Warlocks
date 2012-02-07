@@ -80,12 +80,3 @@ class Client:
 			if self.cReader.getData(datagram):
 				data.append(self.processData(datagram))
 		return data
-
-	def appendData(self,data):
-		while self.cReader.dataAvailable():
-			datagram = NetDatagram()  # catch the incoming data in this instance
-			# Check the return value; if we were threaded, someone else could have
-			# snagged this data before we did
-			if self.cReader.getData(datagram):
-				data.append(self.processData(datagram))
-		return data

@@ -49,16 +49,16 @@ class MainMenu():
 		)
 		
 		self.addButton("QUIT!",  game.quit,1, -.5)
-        
-        def join_chat(self):
-            pass
-            # Let the client mini auth with the lobby server(lobby_loop) by "Loging into the chat"
-            # Since everything will be in the main menu? like a main chat window.. something similar to HoN i guess?
-            # When the player opens the Join game by button, a list will be send from the lobby server telling it what games are active.
-            # Then the player picks one and it connects via the host name/ip or whatever.
-            # While this is busy happening the client stays connected to the lobby server.
+
+	def join_chat(self):
+		pass
+		# Let the client mini auth with the lobby server(lobby_loop) by "Loging into the chat"
+		# Since everything will be in the main menu? like a main chat window.. something similar to HoN i guess?
+		# When the player opens the Join game by button, a list will be send from the lobby server telling it what games are active.
+		# Then the player picks one and it connects via the host name/ip or whatever.
+		# While this is busy happening the client stays connected to the lobby server.
 		
-        # Check here for the blocking.
+	# Check here for the blocking.
 	def join_server(self):
 		self.setIp(self.entry.get())
 		self.status.setText("Attempting to join server @ "+self.ip+"...")

@@ -29,9 +29,7 @@ class PreLobby():
 
 		game.accept('enter', self.attemptLogin)         
 		# submits the login form, or you can just click the Login button
-                
-              
-                
+	
 	def loginScreen(self,statusText):
 		# creates a basic login screen that asks for a username/password
 		
@@ -74,8 +72,8 @@ class PreLobby():
 		p = boxloc + Vec3(0.95, 0, -0.9)
 		self.createAccButton = DirectButton(text= "Create Account", scale=0.050, pos = p, relief=DGG.GROOVE, command=self.attemptCreateAccount)
 		# Made a quick button for adding accounts. Its fugly
-                
-		
+
+
 		p = boxloc + Vec3(0, -0.4, 0)
 		self.statusText = OnscreenText(text = statusText, pos = p, scale = 0.043, fg = (1, 0.5, 0, 1), align=TextNode.ACenter)
 		# A simple text object that you can display an error/status messages
@@ -103,11 +101,10 @@ class PreLobby():
 			self.updateStatus("You must enter a password")
 			self.usernameBox['focus'] = 0
 			self.passwordBox['focus'] = 1
-                        
+			
 		elif self.usernameBox.get() != "" and self.passwordBox.get() != "":
 			# If user and pass is filled in, send it to the login manager.
 			return self.game.login(self.usernameBox.get(), self.passwordBox.get())
-
 			
 	def attemptCreateAccount(self):
 		# This checks and creates a new account with the username and password.
@@ -131,7 +128,6 @@ class PreLobby():
 			self.updateStatus("")
 			# If user and pass is filled in we send the data once again. but this time to createAccount :P
 			return self.game.createAccount(self.usernameBox.get(), self.passwordBox.get())
-                
 		
 	def cycleLoginBox(self):
 		# function is triggered by the tab key so you can cycle between

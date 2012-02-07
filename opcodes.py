@@ -1,0 +1,37 @@
+####
+##	 SERVER OPCODES
+#
+
+
+###########
+#
+#  CLIENT
+#
+
+# Login states
+CMSG_LOGIN_REQ				= 0x1
+
+# COMMON ERROR PACKET FROM CLIENT
+CMSG_ERROR_PKD				= 0x6
+
+# CLIENT LOBBY STATES
+CMSG_CHAT					= 0x8
+
+
+###########
+#
+#  SERVER
+#
+
+# Login States
+SMSG_LOGIN_FAIL				= 0x0
+SMSG_LOGIN_RESPONSE			= 0x2
+
+# COMMON ERROR PACKET FROM SERVER
+SMSG_ERROR_PKD 				= 0x5
+
+# DB RELATED STRINGS
+SMSG_DB_STATUS				= 0xa
+
+# SERVER CHAT REPLY
+SMSG_CHAT					= 0x9

@@ -26,11 +26,13 @@ from game import Game
 # We can add them later.
 # like: LOGIN_REQUEST = 0x00
 
+game_tick=1.0/60.0
+
 class LoginInst():
 	def __init__(self):
 		# Initialise Window
-                
-                # Dont need window.
+		
+		# Dont need window.
 		self.showbase=ShowBase()
 		
 		# Disable Mouse Control for camera
@@ -40,12 +42,12 @@ class LoginInst():
 		#camera.lookAt(0,0,0)
 		
 		# Start our server up
-                print ""
-                print "INIT: LOGIN SERVER...\n"
+		print ""
+		print "INIT: LOGIN SERVER...\n"
 		self.LoginServer = LoginServer(9098, compress=True)
 		self.db = DataBase()
 		self.users=self.LoginServer.clients
-		print self.users, "HERE !!!!!!!!!"
+
 		
 		taskMgr.doMethodLater(0.2, self.lobby_loop, 'Lobby Loop')
 
@@ -53,8 +55,8 @@ class LoginInst():
 	def lobby_loop(self,task):
 		# if in lobby state
 		temp=self.LoginServer.getData()
-		print temp
 		if temp!=[]:
+			
 			for i in range(len(temp)):
 				valid_packet=False
 				package=temp[i]
@@ -123,10 +125,20 @@ class LoginInst():
 			#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
 			return task.done
 		return task.again
+	
+	# this will be moved onto the game server itself (as a pregame wait until full/enough peeps and everyone to ready)
+	def pregame_loop(self,task):
+		print "Pregame State"
+		self.game_time=0
+		self.tick=0
+		self.game=Game(len(self.users),game_tick,self.showbase)
+		for u in range(len(self.users)):
+			self.users[u]['warlock']=self.game.warlock[u]
+		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
+		return task.done
 		
-            
-            # FROM HERE WILL GO TO GAME SERVER>>>
+		# FROM HERE WILL GO TO GAME SERVER>>>
 		#return task.again
-                
+		
 ls = LoginInst()
 run()

@@ -108,25 +108,7 @@ class CameraHandler(DirectObject.DirectObject):
 		self.key_pan_rate=0.75
 		# pan rate for when user presses the arrow keys
 		
-		# CHESSBOARD STUFF FOR PICKING POINT IN 3D SPACE FROM MOUSE CLICK
-		#Since we are using collision detection to do picking, we set it up like
-		#any other collision detection system with a traverser and a handler
-		self.picker = CollisionTraverser()            #Make a traverser
-		self.pq     = CollisionHandlerQueue()         #Make a handler
-		#Make a collision node for our picker ray
-		self.pickerNode = CollisionNode('mouseRay')
-		#Attach that node to the camera since the ray will need to be positioned
-		#relative to it
-		self.pickerNP = camera.attachNewNode(self.pickerNode)
-		#Everything to be picked will use bit 1. This way if we were doing other
-		#collision we could seperate it
-		self.pickerNode.setFromCollideMask(BitMask32.bit(1))
-		self.pickerRay = CollisionRay()               #Make our ray
-		self.pickerNode.addSolid(self.pickerRay)      #Add it to the collision node
-		#Register the ray as something that can cause collisions
-		self.picker.addCollider(self.pickerNP, self.pq)
-		#self.picker.showCollisions(render)
-		# UNTIL HERE
+		self.plane = Plane(Vec3(0, 0, 1), Point3(0, 0, 0))
 
 	def zoomOut(self):
 		if(self.camDist <= self.maxZoomOut):
@@ -350,21 +332,12 @@ class CameraHandler(DirectObject.DirectObject):
 		#Set the position of the ray based on the mouse position
 		if base.mouseWatcherNode.hasMouse():
 			mpos = base.mouseWatcherNode.getMouse()
-			self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
-			
-			nearPoint = render.getRelativePoint(camera, self.pickerRay.getOrigin())
-			#Same thing with the direction of the ray
-			nearVec = render.getRelativeVector(camera, self.pickerRay.getDirection())
-			destination=PointAtZ(0, nearPoint, nearVec)
-			return destination
+			pos3d = Point3()
+			nearPoint = Point3()
+			farPoint = Point3()
+			base.camLens.extrude(mpos, nearPoint, farPoint)
+			if self.plane.intersectsLine(pos3d,
+					render.getRelativePoint(camera, nearPoint),
+					render.getRelativePoint(camera, farPoint)):
+				return pos3d
 		return Vec3(-1,-1,-1)
-
-#This function, given a line (vector plus origin point) and a desired z value,
-#will give us the point on the line where the desired z value is what we want.
-#This is how we know where to position an object in 3D space based on a 2D mouse
-#position. It also assumes that we are dragging in the XY plane.
-#
-#This is derived from the mathmatical of a plane, solved for a given point
-def PointAtZ(z, point, vec):
-  return point + vec * ((z-point.getZ()) / vec.getZ())
-# STOLEN FROM CHESSBOARD EXAMPLE
